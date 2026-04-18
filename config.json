@@ -31,12 +31,9 @@
         { "value": "375x812", "label": { "zh": "375 × 812 (iPhone X/XS/11 Pro/12 mini/13 mini)", "ja": "375 × 812 (iPhone X/XS/11 Pro/12 mini/13 mini)", "en": "375 × 812 (iPhone X/XS/11 Pro/12 mini/13 mini)" } },
         { "value": "390x844", "label": { "zh": "390 × 844 (iPhone 12/13/14/15)", "ja": "390 × 844 (iPhone 12/13/14/15)", "en": "390 × 844 (iPhone 12/13/14/15)" } },
         { "value": "393x852", "label": { "zh": "393 × 852 (iPhone 15 Pro/16)", "ja": "393 × 852 (iPhone 15 Pro/16)", "en": "393 × 852 (iPhone 15 Pro/16)" } },
-        { "value": "402x874", "label": { "zh": "402 × 874 (iPhone 16 Pro/17)", "ja": "402 × 874 (iPhone 16 Pro/17)", "en": "402 × 874 (iPhone 16 Pro/17)" } },
         { "value": "414x896", "label": { "zh": "414 × 896 (iPhone XS Max/11 Pro Max)", "ja": "414 × 896 (iPhone XS Max/11 Pro Max)", "en": "414 × 896 (iPhone XS Max/11 Pro Max)" } },
         { "value": "428x926", "label": { "zh": "428 × 926 (iPhone 12/13/14/15 Plus/Pro Max)", "ja": "428 × 926 (iPhone 12/13/14/15 Plus/Pro Max)", "en": "428 × 926 (iPhone 12/13/14/15 Plus/Pro Max)" } },
-        { "value": "430x932", "label": { "zh": "430 × 932 (iPhone 16/17 Pro Max)", "ja": "430 × 932 (iPhone 16/17 Pro Max)", "en": "430 × 932 (iPhone 16/17 Pro Max)" } },
-        { "value": "440x956", "label": { "zh": "440 × 956 (iPhone 16/17 Pro Max)", "ja": "440 × 956 (iPhone 16/17 Pro Max)", "en": "440 × 956 (iPhone 16/17 Pro Max)" } },
-        { "value": "1260x2740", "label": { "zh": "1260 × 2740 (iPhone 17 Air)", "ja": "1260 × 2740 (iPhone 17 Air)", "en": "1260 × 2740 (iPhone 17 Air)" } }
+        { "value": "430x932", "label": { "zh": "430 × 932 (iPhone 14/15 Pro Max)", "ja": "430 × 932 (iPhone 14/15 Pro Max)", "en": "430 × 932 (iPhone 14/15 Pro Max)" } }
       ]
     },
     {

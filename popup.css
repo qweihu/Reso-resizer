@@ -18,7 +18,7 @@ body {
   width: 280px;
   margin: 0;
   padding: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background-color: var(--bg-color);
   color: var(--text-main);
   -webkit-font-smoothing: antialiased;
@@ -292,4 +292,27 @@ input:checked + .slider:before {
 
 .primary-btn:active {
   transform: translateY(1px);
+}
+
+.primary-btn:disabled {
+  background-color: #9CA3AF;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.status-message {
+  min-height: 16px;
+  margin: -8px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.status-message.is-error {
+  color: #B91C1C;
+}
+
+.status-message.is-success {
+  color: #047857;
 }
