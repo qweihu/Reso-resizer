@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Reso-resizer",
+  "version": "1.0",
+  "description": "Resize browser window to exact pixel-perfect dimensions for screenshots. Supports viewport-only mode, device presets (iPhone, iPad, Android), and multi-language.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Reso-resizer"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": [
+    "windows",
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ]
+}

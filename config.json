@@ -1,0 +1,73 @@
+{
+  "_comment": {
+    "zh": "配置文件说明：defaultResolution 设置默认选中的分辨率；defaultViewportOnly 设置是否默认开启仅网页可视区域模式；presets 定义预设分辨率分组，每个 group 包含多语言名称，options 包含具体分辨率选项",
+    "ja": "設定ファイルの説明：defaultResolution はデフォルトで選択される解像度を設定します；defaultViewportOnly はデフォルトでビューポートのみモードを有効にするかを設定します；presets はプリセット解像度のグループを定義し、各 group は多言語名を含み、options は具体的な解像度オプションを含みます",
+    "en": "Config file guide: defaultResolution sets the default selected resolution; defaultViewportOnly sets whether to enable viewport-only mode by default; presets defines preset resolution groups, each group contains multilingual names, and options contains specific resolution options"
+  },
+  "defaultResolution": "1440x900",
+  "defaultViewportOnly": false,
+  "presets": [
+    {
+      "group": {
+        "zh": "常用",
+        "ja": "よく使う",
+        "en": "Common"
+      },
+      "options": [
+        { "value": "1440x900", "label": { "zh": "1440 × 900 (MacBook 13\")", "ja": "1440 × 900 (MacBook 13\")", "en": "1440 × 900 (MacBook 13\")" } },
+        { "value": "1920x1080", "label": { "zh": "1920 × 1080 (FHD)", "ja": "1920 × 1080 (フルHD)", "en": "1920 × 1080 (FHD)" } },
+        { "value": "1366x768", "label": { "zh": "1366 × 768 (HD)", "ja": "1366 × 768 (HD)", "en": "1366 × 768 (HD)" } },
+        { "value": "2560x1440", "label": { "zh": "2560 × 1440 (2K QHD)", "ja": "2560 × 1440 (2K QHD)", "en": "2560 × 1440 (2K QHD)" } },
+        { "value": "3840x2160", "label": { "zh": "3840 × 2160 (4K UHD)", "ja": "3840 × 2160 (4K UHD)", "en": "3840 × 2160 (4K UHD)" } }
+      ]
+    },
+    {
+      "group": {
+        "zh": "iPhone",
+        "ja": "iPhone",
+        "en": "iPhone"
+      },
+      "options": [
+        { "value": "375x812", "label": { "zh": "375 × 812 (iPhone X/XS/11 Pro/12 mini/13 mini)", "ja": "375 × 812 (iPhone X/XS/11 Pro/12 mini/13 mini)", "en": "375 × 812 (iPhone X/XS/11 Pro/12 mini/13 mini)" } },
+        { "value": "390x844", "label": { "zh": "390 × 844 (iPhone 12/13/14/15)", "ja": "390 × 844 (iPhone 12/13/14/15)", "en": "390 × 844 (iPhone 12/13/14/15)" } },
+        { "value": "393x852", "label": { "zh": "393 × 852 (iPhone 15 Pro/16)", "ja": "393 × 852 (iPhone 15 Pro/16)", "en": "393 × 852 (iPhone 15 Pro/16)" } },
+        { "value": "402x874", "label": { "zh": "402 × 874 (iPhone 16 Pro/17)", "ja": "402 × 874 (iPhone 16 Pro/17)", "en": "402 × 874 (iPhone 16 Pro/17)" } },
+        { "value": "414x896", "label": { "zh": "414 × 896 (iPhone XS Max/11 Pro Max)", "ja": "414 × 896 (iPhone XS Max/11 Pro Max)", "en": "414 × 896 (iPhone XS Max/11 Pro Max)" } },
+        { "value": "428x926", "label": { "zh": "428 × 926 (iPhone 12/13/14/15 Plus/Pro Max)", "ja": "428 × 926 (iPhone 12/13/14/15 Plus/Pro Max)", "en": "428 × 926 (iPhone 12/13/14/15 Plus/Pro Max)" } },
+        { "value": "430x932", "label": { "zh": "430 × 932 (iPhone 16/17 Pro Max)", "ja": "430 × 932 (iPhone 16/17 Pro Max)", "en": "430 × 932 (iPhone 16/17 Pro Max)" } },
+        { "value": "440x956", "label": { "zh": "440 × 956 (iPhone 16/17 Pro Max)", "ja": "440 × 956 (iPhone 16/17 Pro Max)", "en": "440 × 956 (iPhone 16/17 Pro Max)" } },
+        { "value": "1260x2740", "label": { "zh": "1260 × 2740 (iPhone 17 Air)", "ja": "1260 × 2740 (iPhone 17 Air)", "en": "1260 × 2740 (iPhone 17 Air)" } }
+      ]
+    },
+    {
+      "group": {
+        "zh": "Android",
+        "ja": "Android",
+        "en": "Android"
+      },
+      "options": [
+        { "value": "360x640", "label": { "zh": "360 × 640 (Android Small)", "ja": "360 × 640 (Android Small)", "en": "360 × 640 (Android Small)" } },
+        { "value": "360x740", "label": { "zh": "360 × 740 (Galaxy S8/S9/S10)", "ja": "360 × 740 (Galaxy S8/S9/S10)", "en": "360 × 740 (Galaxy S8/S9/S10)" } },
+        { "value": "360x780", "label": { "zh": "360 × 780 (Pixel 5)", "ja": "360 × 780 (Pixel 5)", "en": "360 × 780 (Pixel 5)" } },
+        { "value": "360x800", "label": { "zh": "360 × 800 (Galaxy S20/S21)", "ja": "360 × 800 (Galaxy S20/S21)", "en": "360 × 800 (Galaxy S20/S21)" } },
+        { "value": "384x854", "label": { "zh": "384 × 854 (Pixel 6/7)", "ja": "384 × 854 (Pixel 6/7)", "en": "384 × 854 (Pixel 6/7)" } },
+        { "value": "412x892", "label": { "zh": "412 × 892 (Pixel 8 Pro)", "ja": "412 × 892 (Pixel 8 Pro)", "en": "412 × 892 (Pixel 8 Pro)" } }
+      ]
+    },
+    {
+      "group": {
+        "zh": "平板",
+        "ja": "タブレット",
+        "en": "Tablet"
+      },
+      "options": [
+        { "value": "600x960", "label": { "zh": "600 × 960 (Nexus 7)", "ja": "600 × 960 (Nexus 7)", "en": "600 × 960 (Nexus 7)" } },
+        { "value": "768x1024", "label": { "zh": "768 × 1024 (iPad Mini/Air)", "ja": "768 × 1024 (iPad Mini/Air)", "en": "768 × 1024 (iPad Mini/Air)" } },
+        { "value": "810x1080", "label": { "zh": "810 × 1080 (iPad 10th)", "ja": "810 × 1080 (iPad 第10世代)", "en": "810 × 1080 (iPad 10th)" } },
+        { "value": "834x1112", "label": { "zh": "834 × 1112 (iPad Air 10.9\")", "ja": "834 × 1112 (iPad Air 10.9\")", "en": "834 × 1112 (iPad Air 10.9\")" } },
+        { "value": "834x1194", "label": { "zh": "834 × 1194 (iPad Pro 11\")", "ja": "834 × 1194 (iPad Pro 11\")", "en": "834 × 1194 (iPad Pro 11\")" } },
+        { "value": "1024x1366", "label": { "zh": "1024 × 1366 (iPad Pro 12.9\")", "ja": "1024 × 1366 (iPad Pro 12.9\")", "en": "1024 × 1366 (iPad Pro 12.9\")" } }
+      ]
+    }
+  ]
+}

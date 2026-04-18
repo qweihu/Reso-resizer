@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Reso-resizer</title>
+  <link rel="stylesheet" href="popup.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="icon-placeholder">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- 极简的窗口/视图图标，代表精准控制 -->
+          <rect x="4" y="4" width="16" height="16" rx="2" stroke="#4F46E5" stroke-width="2"/>
+          <path d="M4 9H20" stroke="#4F46E5" stroke-width="2"/>
+          <circle cx="7" cy="6.5" r="1" fill="#4F46E5"/>
+          <circle cx="10" cy="6.5" r="1" fill="#4F46E5"/>
+        </svg>
+      </div>
+      <h3>Reso-resizer</h3>
+    </div>
+    
+    <div class="tabs">
+      <label class="tab-label">
+        <input type="radio" name="mode" value="preset" checked>
+        <span class="tab-text">预置</span>
+      </label>
+      <label class="tab-label">
+        <input type="radio" name="mode" value="custom">
+        <span class="tab-text">自定义</span>
+      </label>
+    </div>
+
+    <div class="content-area">
+      <!-- 预置分辨率部分 -->
+      <div id="preset-section" class="section">
+        <div class="form-group">
+          <label for="preset-select">选择分辨率</label>
+          <div class="select-wrapper">
+            <select id="preset-select">
+              <!-- 选项将由 JS 动态从 config.json 渲染 -->
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- 自定义分辨率部分 -->
+      <div id="custom-section" class="section hidden">
+        <div class="dimension-inputs">
+          <div class="form-group">
+            <label for="custom-width">宽度 (px)</label>
+            <input type="number" id="custom-width" placeholder="1920" min="100">
+          </div>
+          <div class="divider">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 6L6 18M6 6L18 18" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="form-group">
+            <label for="custom-height">高度 (px)</label>
+            <input type="number" id="custom-height" placeholder="1080" min="100">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Viewport 设置 -->
+      <div class="viewport-setting">
+        <label class="toggle-switch">
+          <input type="checkbox" id="viewport-only">
+          <span class="slider"></span>
+        </label>
+        <div class="setting-text">
+          <span class="setting-title">仅网页可视区域 (Viewport)</span>
+          <span class="setting-desc">不包含工具栏、地址栏和书签栏</span>
+        </div>
+      </div>
+    </div>
+
+    <button id="apply-btn" class="primary-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      应用分辨率
+    </button>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
