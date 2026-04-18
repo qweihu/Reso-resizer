@@ -71,6 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const i18n = {
     zh: {
+      appTitle: 'Reso-resizer',
       preset: '预置',
       custom: '自定义',
       selectResolution: '选择分辨率',
@@ -94,6 +95,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       loadError: '配置文件不可用，已自动切换为内置安全预设。'
     },
     ja: {
+      appTitle: 'レゾリサイズ',
       preset: 'プリセット',
       custom: 'カスタム',
       selectResolution: '解像度を選択',
@@ -117,6 +119,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       loadError: '設定ファイルを読み込めなかったため、内蔵の安全なプリセットに切り替えました。'
     },
     en: {
+      appTitle: 'Reso-resizer',
       preset: 'Preset',
       custom: 'Custom',
       selectResolution: 'Select Resolution',
@@ -212,6 +215,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     t = i18n[currentLang];
     html.lang = currentLang;
 
+    document.title = t.appTitle;
+    document.querySelector('.header h3').textContent = t.appTitle;
     document.querySelectorAll('.tab-text')[0].textContent = t.preset;
     document.querySelectorAll('.tab-text')[1].textContent = t.custom;
     document.querySelector('label[for="preset-select"]').textContent = t.selectResolution;

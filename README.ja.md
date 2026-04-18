@@ -1,4 +1,6 @@
-# Reso-resizer / レゾリサイズ
+# レゾリサイズ / Reso-resizer 
+
+![Reso-resizer 截图](./screenshot/ja-main.png)
 
 スクリーンショットのサイズがバラバラで困っていませんか？完璧主義のプロダクトマネージャーと開発者のための強力な味方、登場！
 

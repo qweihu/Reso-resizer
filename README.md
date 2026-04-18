@@ -4,6 +4,8 @@
 
 ## 中文
 
+![Reso-resizer 截图](./screenshot/zh-main.png)
+
 还在为截图尺寸不统一而发愁吗？这是给强迫症产品经理和开发者准备的 Chrome 插件。
 
 Reso-resizer（レゾリサイズ）是一个极简的浏览器窗口尺寸调整工具，可以一键把浏览器窗口改成精确分辨率，用来统一截图规范或模拟不同设备显示效果。
@@ -47,6 +49,8 @@ MIT License。
 ---
 
 ## English
+
+![Reso-resizer screenshot](./screenshot/en-main.png)
 
 Tired of inconsistent screenshot sizes? A blessing for perfectionist product managers and developers.
 
