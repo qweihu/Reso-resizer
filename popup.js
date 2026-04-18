@@ -1,4 +1,5 @@
 const FALLBACK_CONFIG = {
+  language: 'auto',
   defaultResolution: '1440x900',
   defaultViewportOnly: false,
   presets: [
@@ -56,6 +57,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const customWidth = document.getElementById('custom-width');
   const customHeight = document.getElementById('custom-height');
   const applyBtn = document.getElementById('apply-btn');
+  const captureBtn = document.getElementById('capture-btn');
   const viewportOnlyCheckbox = document.getElementById('viewport-only');
   const statusMessage = document.getElementById('status-message');
   const html = document.documentElement;
@@ -67,8 +69,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     return 'en';
   };
 
-  const currentLang = getBrowserLang();
-
   const i18n = {
     zh: {
       preset: '预置',
@@ -79,13 +79,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       viewportTitle: '仅网页可视区域 (Viewport)',
       viewportDesc: '不包含工具栏、地址栏和书签栏',
       applyBtn: '应用分辨率',
+      captureBtn: '截图并保存 Viewport',
       loadingConfig: '正在加载配置…',
       applying: '正在调整窗口大小…',
+      capturing: '正在截取当前 Viewport…',
       applySuccess: '分辨率已应用。',
+      captureStepError: '截图失败：',
+      saveStepError: '保存失败：',
       invalidInput: '请输入有效的宽度和高度（最小限制为 100px）。',
       invalidPreset: '当前预置分辨率无效，请重新选择。',
       viewportError: '无法访问当前页面进行精准计算。请在普通网页中使用，Chrome 内部页面和扩展页不受支持。',
       resizeError: '调整窗口大小失败。请确认当前窗口不是最小化、全屏或受系统限制状态。',
+      captureError: '截图或保存失败。请确认当前标签页可见，并允许系统弹出保存对话框。',
       loadError: '配置文件不可用，已自动切换为内置安全预设。'
     },
     ja: {
@@ -97,13 +102,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       viewportTitle: 'ビューポートのみ',
       viewportDesc: 'ツールバー、アドレスバー、ブックマークバーを含まない',
       applyBtn: '解像度を適用',
+      captureBtn: 'ビューポートを保存',
       loadingConfig: '設定を読み込み中…',
       applying: 'ウィンドウサイズを調整中…',
+      capturing: '現在のビューポートをキャプチャ中…',
       applySuccess: '解像度を適用しました。',
+      captureStepError: 'キャプチャ失敗: ',
+      saveStepError: '保存失敗: ',
       invalidInput: '有効な幅と高さを入力してください（最小100px）。',
       invalidPreset: '現在のプリセット解像度が無効です。選び直してください。',
       viewportError: '現在のページにアクセスできないため、正確な計算ができません。通常のウェブページでお試しください。',
       resizeError: 'ウィンドウサイズの変更に失敗しました。最小化、全画面、またはOS制限の状態をご確認ください。',
+      captureError: 'キャプチャまたは保存に失敗しました。現在のタブが表示中で、保存ダイアログが許可されているか確認してください。',
       loadError: '設定ファイルを読み込めなかったため、内蔵の安全なプリセットに切り替えました。'
     },
     en: {
@@ -115,25 +125,51 @@ document.addEventListener('DOMContentLoaded', async () => {
       viewportTitle: 'Viewport Only',
       viewportDesc: 'Excludes toolbar, address bar, and bookmarks bar',
       applyBtn: 'Apply Resolution',
+      captureBtn: 'Capture Viewport',
       loadingConfig: 'Loading configuration...',
       applying: 'Resizing browser window...',
+      capturing: 'Capturing current viewport...',
       applySuccess: 'Resolution applied.',
+      captureStepError: 'Capture failed: ',
+      saveStepError: 'Save failed: ',
       invalidInput: 'Please enter valid width and height (minimum 100px).',
       invalidPreset: 'The selected preset is invalid. Please choose another one.',
       viewportError: 'Cannot access the current page for precise calculation. Use this on a regular webpage, not on Chrome internal or extension pages.',
       resizeError: 'Failed to resize the browser window. Make sure the window is not minimized, fullscreen, or blocked by system restrictions.',
+      captureError: 'Failed to capture or save the screenshot. Make sure the active tab is visible and the save dialog is allowed.',
       loadError: 'The config file could not be loaded, so the extension switched to safe built-in presets.'
     }
   };
 
-  const t = i18n[currentLang];
+  let currentLang = getBrowserLang();
+  let t = i18n[currentLang];
   let isConfigLoaded = false;
+
+  const resolveLanguage = (configLanguage) => {
+    if (configLanguage === 'zh' || configLanguage === 'ja' || configLanguage === 'en') {
+      return configLanguage;
+    }
+
+    return getBrowserLang();
+  };
 
   const setButtonState = (label, disabled) => {
     applyBtn.disabled = disabled;
     applyBtn.innerHTML = `
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      ${label}
+    `;
+  };
+
+  const setCaptureButtonState = (label, disabled) => {
+    captureBtn.disabled = disabled;
+    captureBtn.innerHTML = `
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M7 7H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M9 7l1.5-2h3L15 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="12" cy="13" r="3" stroke="currentColor" stroke-width="2"/>
       </svg>
       ${label}
     `;
@@ -160,6 +196,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     return { width, height };
+  };
+
+  const getErrorMessage = (error, fallback) => {
+    const message =
+      error?.message ||
+      chrome.runtime?.lastError?.message ||
+      fallback;
+
+    return `${message}`.trim();
+  };
+
+  const applyLanguage = (lang) => {
+    currentLang = resolveLanguage(lang);
+    t = i18n[currentLang];
+    html.lang = currentLang;
+
+    document.querySelectorAll('.tab-text')[0].textContent = t.preset;
+    document.querySelectorAll('.tab-text')[1].textContent = t.custom;
+    document.querySelector('label[for="preset-select"]').textContent = t.selectResolution;
+    document.querySelector('label[for="custom-width"]').textContent = t.width;
+    document.querySelector('label[for="custom-height"]').textContent = t.height;
+    document.querySelector('.setting-title').textContent = t.viewportTitle;
+    document.querySelector('.setting-desc').textContent = t.viewportDesc;
+    setButtonState(t.applyBtn, applyBtn.disabled);
+    setCaptureButtonState(t.captureBtn, captureBtn.disabled);
   };
 
   const renderPresets = (config) => {
@@ -202,28 +263,26 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       const config = await response.json();
+      applyLanguage(config.language);
       renderPresets(config);
       isConfigLoaded = true;
       setButtonState(t.applyBtn, false);
+      setCaptureButtonState(t.captureBtn, false);
       setStatus('');
     } catch (error) {
       console.error('Failed to load config.json:', error);
+      applyLanguage(FALLBACK_CONFIG.language);
       renderPresets(FALLBACK_CONFIG);
       isConfigLoaded = true;
       setButtonState(t.applyBtn, false);
+      setCaptureButtonState(t.captureBtn, false);
       setStatus(t.loadError, 'error');
     }
   };
 
-  html.lang = currentLang;
-  document.querySelectorAll('.tab-text')[0].textContent = t.preset;
-  document.querySelectorAll('.tab-text')[1].textContent = t.custom;
-  document.querySelector('label[for="preset-select"]').textContent = t.selectResolution;
-  document.querySelector('label[for="custom-width"]').textContent = t.width;
-  document.querySelector('label[for="custom-height"]').textContent = t.height;
-  document.querySelector('.setting-title').textContent = t.viewportTitle;
-  document.querySelector('.setting-desc').textContent = t.viewportDesc;
+  applyLanguage(FALLBACK_CONFIG.language);
   setButtonState(t.applyBtn, true);
+  setCaptureButtonState(t.captureBtn, true);
 
   await loadConfig();
 
@@ -319,6 +378,47 @@ document.addEventListener('DOMContentLoaded', async () => {
       setStatus(restrictedPageError ? t.viewportError : t.resizeError, 'error');
     } finally {
       setButtonState(t.applyBtn, false);
+    }
+  });
+
+  captureBtn.addEventListener('click', async () => {
+    if (!isConfigLoaded) {
+      return;
+    }
+
+    setCaptureButtonState(t.capturing, true);
+    setStatus(t.capturing);
+
+    try {
+      let dataUrl;
+
+      try {
+        dataUrl = await chrome.tabs.captureVisibleTab(undefined, { format: 'png' });
+      } catch (error) {
+        console.error('Capture step failed:', error);
+        setStatus(`${t.captureStepError}${getErrorMessage(error, t.captureError)}`, 'error');
+        return;
+      }
+
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+
+      try {
+        await chrome.downloads.download({
+          url: dataUrl,
+          filename: `viewport-${timestamp}.png`,
+          saveAs: true
+        });
+      } catch (error) {
+        console.error('Save step failed:', error);
+        setStatus(`${t.saveStepError}${getErrorMessage(error, t.captureError)}`, 'error');
+        setCaptureButtonState(t.captureBtn, false);
+        return;
+      }
+      return;
+    } catch (error) {
+      console.error('Capture failed:', error);
+      setStatus(t.captureError, 'error');
+      setCaptureButtonState(t.captureBtn, false);
     }
   });
 });

@@ -1,9 +1,10 @@
 {
   "_comment": {
-    "zh": "配置文件说明：defaultResolution 设置默认选中的分辨率；defaultViewportOnly 设置是否默认开启仅网页可视区域模式；presets 定义预设分辨率分组，每个 group 包含多语言名称，options 包含具体分辨率选项",
-    "ja": "設定ファイルの説明：defaultResolution はデフォルトで選択される解像度を設定します；defaultViewportOnly はデフォルトでビューポートのみモードを有効にするかを設定します；presets はプリセット解像度のグループを定義し、各 group は多言語名を含み、options は具体的な解像度オプションを含みます",
-    "en": "Config file guide: defaultResolution sets the default selected resolution; defaultViewportOnly sets whether to enable viewport-only mode by default; presets defines preset resolution groups, each group contains multilingual names, and options contains specific resolution options"
+    "zh": "配置文件说明：language 用于设置界面语言，支持 auto、zh、ja、en；auto 会自动读取 Chrome 的导航语言。defaultResolution 设置默认选中的分辨率；defaultViewportOnly 设置是否默认开启仅网页可视区域模式；presets 定义预设分辨率分组，每个 group 包含多语言名称，options 包含具体分辨率选项",
+    "ja": "設定ファイルの説明：language は UI 言語を設定し、auto、zh、ja、en をサポートします。auto は Chrome のナビゲーション言語を自動で使用します。defaultResolution はデフォルトで選択される解像度を設定します；defaultViewportOnly はデフォルトでビューポートのみモードを有効にするかを設定します；presets はプリセット解像度のグループを定義し、各 group は多言語名を含み、options は具体的な解像度オプションを含みます",
+    "en": "Config file guide: language sets the UI language and supports auto, zh, ja, and en; auto uses Chrome navigation language automatically. defaultResolution sets the default selected resolution; defaultViewportOnly sets whether to enable viewport-only mode by default; presets defines preset resolution groups, each group contains multilingual names, and options contains specific resolution options"
   },
+  "language": "auto",
   "defaultResolution": "1440x900",
   "defaultViewportOnly": false,
   "presets": [
