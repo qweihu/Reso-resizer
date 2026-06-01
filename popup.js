@@ -49,6 +49,54 @@ const FALLBACK_CONFIG = {
   ]
 };
 
+// ==================== Storage Manager ====================
+const STORAGE_KEY = 'userState';
+
+const getDefaultState = () => ({
+  mode: 'preset',
+  presetResolution: null,
+  customWidth: '1920',
+  customHeight: '1080',
+  viewportOnly: false
+});
+
+const saveUserState = async (state) => {
+  try {
+    const stateToSave = {
+      ...getDefaultState(),
+      ...state
+    };
+    await chrome.storage.local.set({ [STORAGE_KEY]: stateToSave });
+  } catch (error) {
+    console.error('Failed to save user state:', error);
+  }
+};
+
+const loadUserState = async () => {
+  try {
+    const result = await chrome.storage.local.get(STORAGE_KEY);
+    if (result[STORAGE_KEY]) {
+      return { ...getDefaultState(), ...result[STORAGE_KEY] };
+    }
+    return null;
+  } catch (error) {
+    console.error('Failed to load user state:', error);
+    return null;
+  }
+};
+
+const saveCurrentState = () => {
+  const stateToSave = {
+    mode: document.querySelector('input[name="mode"]:checked').value,
+    presetResolution: document.getElementById('preset-select').value,
+    customWidth: document.getElementById('custom-width').value,
+    customHeight: document.getElementById('custom-height').value,
+    viewportOnly: document.getElementById('viewport-only').checked
+  };
+  saveUserState(stateToSave);
+};
+// ==================== Storage Manager End ====================
+
 document.addEventListener('DOMContentLoaded', async () => {
   const modeRadios = document.querySelectorAll('input[name="mode"]');
   const presetSection = document.getElementById('preset-section');
@@ -228,7 +276,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     setCaptureButtonState(t.captureBtn, captureBtn.disabled);
   };
 
-  const renderPresets = (config) => {
+  const isPresetValid = (config, presetValue) => {
+    for (const group of config.presets) {
+      for (const opt of group.options) {
+        if (opt.value === presetValue) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
+  const renderPresets = (config, savedState = null) => {
     presetSelect.innerHTML = '';
 
     config.presets.forEach((groupData) => {
@@ -245,16 +304,62 @@ document.addEventListener('DOMContentLoaded', async () => {
       presetSelect.appendChild(optgroup);
     });
 
-    const defaultPreset = parseResolution(config.defaultResolution)
-      ? config.defaultResolution
-      : FALLBACK_CONFIG.defaultResolution;
+    // 确定默认分辨率
+    let defaultPreset;
+    if (savedState && savedState.mode === 'preset' && savedState.presetResolution) {
+      // 检查保存的分辨率是否在预置列表中
+      if (isPresetValid(config, savedState.presetResolution)) {
+        defaultPreset = savedState.presetResolution;
+      } else {
+        defaultPreset = parseResolution(config.defaultResolution)
+          ? config.defaultResolution
+          : FALLBACK_CONFIG.defaultResolution;
+      }
+    } else {
+      defaultPreset = parseResolution(config.defaultResolution)
+        ? config.defaultResolution
+        : FALLBACK_CONFIG.defaultResolution;
+    }
 
     presetSelect.value = defaultPreset;
     if (!presetSelect.value) {
       presetSelect.selectedIndex = 0;
     }
 
-    viewportOnlyCheckbox.checked = Boolean(config.defaultViewportOnly);
+    // 恢复模式
+    if (savedState && savedState.mode) {
+      const targetMode = savedState.mode;
+      modeRadios.forEach((radio) => {
+        if (radio.value === targetMode) {
+          radio.checked = true;
+        }
+      });
+
+      if (targetMode === 'preset') {
+        presetSection.classList.remove('hidden');
+        customSection.classList.add('hidden');
+      } else {
+        presetSection.classList.add('hidden');
+        customSection.classList.remove('hidden');
+      }
+    }
+
+    // 恢复自定义宽高
+    if (savedState && savedState.mode === 'custom') {
+      if (savedState.customWidth) {
+        customWidth.value = savedState.customWidth;
+      }
+      if (savedState.customHeight) {
+        customHeight.value = savedState.customHeight;
+      }
+    }
+
+    // 恢复 viewportOnly 状态
+    if (savedState && typeof savedState.viewportOnly === 'boolean') {
+      viewportOnlyCheckbox.checked = savedState.viewportOnly;
+    } else {
+      viewportOnlyCheckbox.checked = Boolean(config.defaultViewportOnly);
+    }
   };
 
   const loadConfig = async () => {
@@ -269,7 +374,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const config = await response.json();
       applyLanguage(config.language);
-      renderPresets(config);
+
+      // 加载用户保存的状态
+      const savedState = await loadUserState();
+      renderPresets(config, savedState);
+
       isConfigLoaded = true;
       setButtonState(t.applyBtn, false);
       setCaptureButtonState(t.captureBtn, false);
@@ -277,7 +386,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
       console.error('Failed to load config.json:', error);
       applyLanguage(FALLBACK_CONFIG.language);
-      renderPresets(FALLBACK_CONFIG);
+
+      // 加载用户保存的状态（即使 config.json 加载失败）
+      const savedState = await loadUserState();
+      renderPresets(FALLBACK_CONFIG, savedState);
+
       isConfigLoaded = true;
       setButtonState(t.applyBtn, false);
       setCaptureButtonState(t.captureBtn, false);
@@ -291,6 +404,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   await loadConfig();
 
+  // 模式切换事件
   modeRadios.forEach((radio) => {
     radio.addEventListener('change', (event) => {
       if (event.target.value === 'preset') {
@@ -303,8 +417,36 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (isConfigLoaded) {
         setStatus('');
+        saveCurrentState();
       }
     });
+  });
+
+  // 预置分辨率选择变化事件
+  presetSelect.addEventListener('change', () => {
+    if (isConfigLoaded) {
+      saveCurrentState();
+    }
+  });
+
+  // 自定义宽高输入变化事件
+  customWidth.addEventListener('change', () => {
+    if (isConfigLoaded) {
+      saveCurrentState();
+    }
+  });
+
+  customHeight.addEventListener('change', () => {
+    if (isConfigLoaded) {
+      saveCurrentState();
+    }
+  });
+
+  // Viewport 开关变化事件
+  viewportOnlyCheckbox.addEventListener('change', () => {
+    if (isConfigLoaded) {
+      saveCurrentState();
+    }
   });
 
   applyBtn.addEventListener('click', async () => {
@@ -371,6 +513,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       setStatus(t.applySuccess, 'success');
+
+      // 保存用户状态
+      saveCurrentState();
     } catch (error) {
       console.error('Resize failed:', error);
 
