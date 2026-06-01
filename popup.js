@@ -60,44 +60,73 @@ const getDefaultState = () => ({
   viewportOnly: false
 });
 
-const saveUserState = async (state) => {
+const saveUserState = (state) => {
   try {
     const stateToSave = {
       ...getDefaultState(),
       ...state
     };
-    await chrome.storage.local.set({ [STORAGE_KEY]: stateToSave });
+    console.log('[Storage] Saving state:', stateToSave);
+    chrome.storage.local.set({ [STORAGE_KEY]: stateToSave }, () => {
+      if (chrome.runtime.lastError) {
+        console.error('[Storage] Save error:', chrome.runtime.lastError);
+      } else {
+        console.log('[Storage] State saved successfully');
+      }
+    });
   } catch (error) {
-    console.error('Failed to save user state:', error);
+    console.error('[Storage] Failed to save user state:', error);
   }
 };
 
-const loadUserState = async () => {
+const loadUserState = (callback) => {
   try {
-    const result = await chrome.storage.local.get(STORAGE_KEY);
-    if (result[STORAGE_KEY]) {
-      return { ...getDefaultState(), ...result[STORAGE_KEY] };
-    }
-    return null;
+    console.log('[Storage] Loading state...');
+    chrome.storage.local.get(STORAGE_KEY, (result) => {
+      if (chrome.runtime.lastError) {
+        console.error('[Storage] Load error:', chrome.runtime.lastError);
+        callback(null);
+        return;
+      }
+      
+      console.log('[Storage] Raw result:', result);
+      
+      if (result[STORAGE_KEY]) {
+        const mergedState = { ...getDefaultState(), ...result[STORAGE_KEY] };
+        console.log('[Storage] Loaded state:', mergedState);
+        callback(mergedState);
+      } else {
+        console.log('[Storage] No saved state found');
+        callback(null);
+      }
+    });
   } catch (error) {
-    console.error('Failed to load user state:', error);
-    return null;
+    console.error('[Storage] Failed to load user state:', error);
+    callback(null);
   }
 };
 
 const saveCurrentState = () => {
+  const modeRadio = document.querySelector('input[name="mode"]:checked');
+  if (!modeRadio) {
+    console.warn('[Storage] No mode radio button checked');
+    return;
+  }
+  
   const stateToSave = {
-    mode: document.querySelector('input[name="mode"]:checked').value,
+    mode: modeRadio.value,
     presetResolution: document.getElementById('preset-select').value,
     customWidth: document.getElementById('custom-width').value,
     customHeight: document.getElementById('custom-height').value,
     viewportOnly: document.getElementById('viewport-only').checked
   };
+  
+  console.log('[Storage] Saving current state:', stateToSave);
   saveUserState(stateToSave);
 };
 // ==================== Storage Manager End ====================
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
   const modeRadios = document.querySelectorAll('input[name="mode"]');
   const presetSection = document.getElementById('preset-section');
   const customSection = document.getElementById('custom-section');
@@ -362,47 +391,51 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   };
 
-  const loadConfig = async () => {
+  const loadConfig = () => {
     setButtonState(t.loadingConfig, true);
     setStatus(t.loadingConfig);
 
-    try {
-      const response = await fetch(chrome.runtime.getURL('config.json'));
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
+    fetch(chrome.runtime.getURL('config.json'))
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(config => {
+        applyLanguage(config.language);
+        
+        // 加载用户保存的状态
+        loadUserState((savedState) => {
+          renderPresets(config, savedState);
+          
+          isConfigLoaded = true;
+          setButtonState(t.applyBtn, false);
+          setCaptureButtonState(t.captureBtn, false);
+          setStatus('');
+        });
+      })
+      .catch(error => {
+        console.error('Failed to load config.json:', error);
+        applyLanguage(FALLBACK_CONFIG.language);
 
-      const config = await response.json();
-      applyLanguage(config.language);
-
-      // 加载用户保存的状态
-      const savedState = await loadUserState();
-      renderPresets(config, savedState);
-
-      isConfigLoaded = true;
-      setButtonState(t.applyBtn, false);
-      setCaptureButtonState(t.captureBtn, false);
-      setStatus('');
-    } catch (error) {
-      console.error('Failed to load config.json:', error);
-      applyLanguage(FALLBACK_CONFIG.language);
-
-      // 加载用户保存的状态（即使 config.json 加载失败）
-      const savedState = await loadUserState();
-      renderPresets(FALLBACK_CONFIG, savedState);
-
-      isConfigLoaded = true;
-      setButtonState(t.applyBtn, false);
-      setCaptureButtonState(t.captureBtn, false);
-      setStatus(t.loadError, 'error');
-    }
+        // 加载用户保存的状态（即使 config.json 加载失败）
+        loadUserState((savedState) => {
+          renderPresets(FALLBACK_CONFIG, savedState);
+          
+          isConfigLoaded = true;
+          setButtonState(t.applyBtn, false);
+          setCaptureButtonState(t.captureBtn, false);
+          setStatus(t.loadError, 'error');
+        });
+      });
   };
 
   applyLanguage(FALLBACK_CONFIG.language);
   setButtonState(t.applyBtn, true);
   setCaptureButtonState(t.captureBtn, true);
 
-  await loadConfig();
+  loadConfig();
 
   // 模式切换事件
   modeRadios.forEach((radio) => {
