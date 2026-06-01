@@ -17,6 +17,7 @@ Reso-resizer（レゾリサイズ）是一个极简的浏览器窗口尺寸调�
 - 智能 Viewport 模式：只调整网页可视区域尺寸，自动排除工具栏、地址栏等浏览器界面占用空间。
 - 快速截图保存：可直接截取当前可视区域，并调用系统保存对话框将截图保存为 PNG 文件。
 - 原生多语言支持：根据浏览器语言自动切换中文、日语和英文。
+- 智能状态记忆：自动记住上次使用的分辨率、模式和 Viewport 设置，下次打开插件时自动恢复。
 - 配置文件驱动：所有预置分辨率集中放在 `config.json` 中，维护时不需要改代码。
 
 ### 工作原理
@@ -75,6 +76,7 @@ Reso-resizer (レゾリサイズ) is a minimalist Chrome extension for pixel-per
 - Smart viewport mode: Resize only the webpage viewport while automatically excluding browser UI such as toolbars and the address bar.
 - Quick viewport capture: Capture the current visible viewport and save it as a PNG file through the system save dialog.
 - Native multilingual support: Automatically switches between Chinese, Japanese, and English based on the browser language.
+- Smart state memory: Automatically remembers last used resolution, mode, and Viewport settings, restoring them when reopening the extension.
 - Configuration-driven presets: Manage all preset resolutions centrally in `config.json` without changing code.
 
 ### How It Works
