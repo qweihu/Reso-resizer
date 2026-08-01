@@ -23,10 +23,6 @@ All notable changes to Reso-resizer are documented here.
 - カスタム幅・高さを論理ピクセルとして説明し、3 言語で Retina 2x の出力例を表示します。
 - README に論理サイズ、物理的なスクリーンショットサイズ、設定の永続化、Release パッケージの説明を追加しました。
 
-### Validation
-
-- Node.js の自動テスト 13 件、JavaScript 構文チェック、JSON 検証、差分チェックを実施しました。
-
 ## [1.0.4]
 
 - 設定駆動のプリセット、状態の永続化、Viewport 補正、PNG キャプチャ、多言語 UI の基盤を整理しました。
