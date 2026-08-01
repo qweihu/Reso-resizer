@@ -45,12 +45,18 @@ const normalizeDimension = (value, fallback) => {
   return parseResolution(`${normalized}x${MIN_DIMENSION}`) ? normalized : fallback;
 };
 
-export const normalizeState = (rawState, presetValues = []) => {
+export const normalizeState = (
+  rawState,
+  presetValues = [],
+  configuredDefaultPreset = '1440x900'
+) => {
   const state = rawState && typeof rawState === 'object' ? rawState : {};
   const validPresets = Array.isArray(presetValues)
     ? presetValues.filter((value) => parseResolution(value))
     : [];
-  const defaultPreset = validPresets[0] || '1440x900';
+  const defaultPreset = validPresets.includes(configuredDefaultPreset)
+    ? configuredDefaultPreset
+    : validPresets[0] || '1440x900';
 
   return {
     mode: state.mode === 'custom' ? 'custom' : 'preset',

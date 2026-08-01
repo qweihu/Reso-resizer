@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const presetValues = config.presets.flatMap((groupData) => (
       groupData.options.map((option) => option.value)
     ));
-    const state = normalizeState(savedState, presetValues);
+    const state = normalizeState(savedState, presetValues, config.defaultResolution);
 
     presetSelect.value = state.presetResolution;
     if (!presetSelect.value) {

@@ -90,6 +90,13 @@ test('normalizeState supplies valid defaults for missing or invalid fields', () 
   });
 });
 
+test('normalizeState uses the configured default preset when no state exists', () => {
+  assert.equal(
+    normalizeState(null, ['1440x900', '1920x1080'], '1920x1080').presetResolution,
+    '1920x1080'
+  );
+});
+
 test('normalizeConfig falls back when presets are empty or malformed', () => {
   const fallback = {
     language: 'auto',
