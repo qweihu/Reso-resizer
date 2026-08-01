@@ -24,12 +24,9 @@ const saveUserState = (state) => {
       ...getDefaultState(),
       ...state
     };
-    console.log('[Storage] Saving state:', stateToSave);
     chrome.storage.local.set({ [STORAGE_KEY]: stateToSave }, () => {
       if (chrome.runtime.lastError) {
         console.error('[Storage] Save error:', chrome.runtime.lastError);
-      } else {
-        console.log('[Storage] State saved successfully');
       }
     });
   } catch (error) {
@@ -39,7 +36,6 @@ const saveUserState = (state) => {
 
 const loadUserState = (callback) => {
   try {
-    console.log('[Storage] Loading state...');
     chrome.storage.local.get(STORAGE_KEY, (result) => {
       if (chrome.runtime.lastError) {
         console.error('[Storage] Load error:', chrome.runtime.lastError);
@@ -47,14 +43,10 @@ const loadUserState = (callback) => {
         return;
       }
       
-      console.log('[Storage] Raw result:', result);
-      
       if (result[STORAGE_KEY]) {
         const mergedState = { ...getDefaultState(), ...result[STORAGE_KEY] };
-        console.log('[Storage] Loaded state:', mergedState);
         callback(mergedState);
       } else {
-        console.log('[Storage] No saved state found');
         callback(null);
       }
     });
@@ -79,7 +71,6 @@ const saveCurrentState = () => {
     viewportOnly: document.getElementById('viewport-only').checked
   };
   
-  console.log('[Storage] Saving current state:', stateToSave);
   saveUserState(stateToSave);
 };
 // ==================== Storage Manager End ====================
@@ -196,24 +187,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const setButtonState = (label, disabled) => {
     applyBtn.disabled = disabled;
-    applyBtn.innerHTML = `
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      ${label}
-    `;
+    applyBtn.querySelector('.button-label').textContent = label;
   };
 
   const setCaptureButtonState = (label, disabled) => {
     captureBtn.disabled = disabled;
-    captureBtn.innerHTML = `
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M7 7H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M9 7l1.5-2h3L15 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="12" cy="13" r="3" stroke="currentColor" stroke-width="2"/>
-      </svg>
-      ${label}
-    `;
+    captureBtn.querySelector('.button-label').textContent = label;
   };
 
   const setStatus = (message, tone = '') => {
