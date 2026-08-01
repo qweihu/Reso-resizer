@@ -477,34 +477,42 @@ document.addEventListener('DOMContentLoaded', () => {
     setStatus(t.capturing);
 
     try {
-      let dataUrl;
-
-      try {
-        dataUrl = await chrome.tabs.captureVisibleTab(undefined, { format: 'png' });
-      } catch (error) {
-        console.error('Capture step failed:', error);
-        setStatus(`${t.captureStepError}${getErrorMessage(error, t.captureError)}`, 'error');
-        return;
-      }
-
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
 
-      try {
-        await chrome.downloads.download({
-          url: dataUrl,
-          filename: `viewport-${timestamp}.png`,
-          saveAs: true
-        });
-      } catch (error) {
-        console.error('Save step failed:', error);
-        setStatus(`${t.saveStepError}${getErrorMessage(error, t.captureError)}`, 'error');
-        setCaptureButtonState(t.captureBtn, false);
-        return;
-      }
-      return;
+      await runCapture(
+        async () => {
+          try {
+            return await chrome.tabs.captureVisibleTab(undefined, { format: 'png' });
+          } catch (error) {
+            const stepError = new Error(
+              `${t.captureStepError}${getErrorMessage(error, t.captureError)}`
+            );
+            stepError.cause = error;
+            throw stepError;
+          }
+        },
+        async (dataUrl) => {
+          try {
+            await chrome.downloads.download({
+              url: dataUrl,
+              filename: `viewport-${timestamp}.png`,
+              saveAs: true
+            });
+          } catch (error) {
+            const stepError = new Error(
+              `${t.saveStepError}${getErrorMessage(error, t.captureError)}`
+            );
+            stepError.cause = error;
+            throw stepError;
+          }
+        }
+      );
+
+      setStatus(t.captureSuccess, 'success');
     } catch (error) {
       console.error('Capture failed:', error);
-      setStatus(t.captureError, 'error');
+      setStatus(error?.message || t.captureError, 'error');
+    } finally {
       setCaptureButtonState(t.captureBtn, false);
     }
   });
