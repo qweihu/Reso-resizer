@@ -48,7 +48,7 @@
       <div id="custom-section" class="section hidden">
         <div class="dimension-inputs">
           <div class="form-group">
-            <label for="custom-width">宽度 (px)</label>
+            <label for="custom-width">宽度（逻辑像素）</label>
             <input type="number" id="custom-width" placeholder="1920" min="100">
           </div>
           <div class="divider">
@@ -57,10 +57,13 @@
             </svg>
           </div>
           <div class="form-group">
-            <label for="custom-height">高度 (px)</label>
+            <label for="custom-height">高度（逻辑像素）</label>
             <input type="number" id="custom-height" placeholder="1080" min="100">
           </div>
         </div>
+        <p class="custom-resolution-hint" aria-live="polite">
+          截图导出尺寸会根据设备像素比放大，例如 Retina 2x 下 1280 × 900 会导出为 2560 × 1800。
+        </p>
       </div>
       
       <!-- Viewport 设置 -->
@@ -80,7 +83,7 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      应用分辨率
+      <span class="button-label">应用分辨率</span>
     </button>
     <button id="capture-btn" class="secondary-btn">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -88,10 +91,10 @@
         <path d="M9 7l1.5-2h3L15 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         <circle cx="12" cy="13" r="3" stroke="currentColor" stroke-width="2"/>
       </svg>
-      截图并保存 Viewport
+      <span class="button-label">截图并保存 Viewport</span>
     </button>
     <p id="status-message" class="status-message" aria-live="polite"></p>
   </div>
-  <script src="popup.js"></script>
+  <script type="module" src="popup.js"></script>
 </body>
 </html>

@@ -1,53 +1,11 @@
-const FALLBACK_CONFIG = {
-  language: 'auto',
-  defaultResolution: '1440x900',
-  defaultViewportOnly: false,
-  presets: [
-    {
-      group: { zh: '常用', ja: 'よく使う', en: 'Common' },
-      options: [
-        { value: '1440x900', label: { zh: '1440 × 900 (MacBook 13")', ja: '1440 × 900 (MacBook 13")', en: '1440 × 900 (MacBook 13")' } },
-        { value: '1920x1080', label: { zh: '1920 × 1080 (FHD)', ja: '1920 × 1080 (フルHD)', en: '1920 × 1080 (FHD)' } },
-        { value: '1366x768', label: { zh: '1366 × 768 (HD)', ja: '1366 × 768 (HD)', en: '1366 × 768 (HD)' } },
-        { value: '2560x1440', label: { zh: '2560 × 1440 (2K QHD)', ja: '2560 × 1440 (2K QHD)', en: '2560 × 1440 (2K QHD)' } },
-        { value: '3840x2160', label: { zh: '3840 × 2160 (4K UHD)', ja: '3840 × 2160 (4K UHD)', en: '3840 × 2160 (4K UHD)' } }
-      ]
-    },
-    {
-      group: { zh: 'iPhone', ja: 'iPhone', en: 'iPhone' },
-      options: [
-        { value: '375x812', label: { zh: '375 × 812 (iPhone X/XS/11 Pro/12 mini/13 mini)', ja: '375 × 812 (iPhone X/XS/11 Pro/12 mini/13 mini)', en: '375 × 812 (iPhone X/XS/11 Pro/12 mini/13 mini)' } },
-        { value: '390x844', label: { zh: '390 × 844 (iPhone 12/13/14/15)', ja: '390 × 844 (iPhone 12/13/14/15)', en: '390 × 844 (iPhone 12/13/14/15)' } },
-        { value: '393x852', label: { zh: '393 × 852 (iPhone 15 Pro/16)', ja: '393 × 852 (iPhone 15 Pro/16)', en: '393 × 852 (iPhone 15 Pro/16)' } },
-        { value: '414x896', label: { zh: '414 × 896 (iPhone XS Max/11 Pro Max)', ja: '414 × 896 (iPhone XS Max/11 Pro Max)', en: '414 × 896 (iPhone XS Max/11 Pro Max)' } },
-        { value: '428x926', label: { zh: '428 × 926 (iPhone 12/13/14/15 Plus/Pro Max)', ja: '428 × 926 (iPhone 12/13/14/15 Plus/Pro Max)', en: '428 × 926 (iPhone 12/13/14/15 Plus/Pro Max)' } },
-        { value: '430x932', label: { zh: '430 × 932 (iPhone 14/15 Pro Max)', ja: '430 × 932 (iPhone 14/15 Pro Max)', en: '430 × 932 (iPhone 14/15 Pro Max)' } }
-      ]
-    },
-    {
-      group: { zh: 'Android', ja: 'Android', en: 'Android' },
-      options: [
-        { value: '360x640', label: { zh: '360 × 640 (Android Small)', ja: '360 × 640 (Android Small)', en: '360 × 640 (Android Small)' } },
-        { value: '360x740', label: { zh: '360 × 740 (Galaxy S8/S9/S10)', ja: '360 × 740 (Galaxy S8/S9/S10)', en: '360 × 740 (Galaxy S8/S9/S10)' } },
-        { value: '360x780', label: { zh: '360 × 780 (Pixel 5)', ja: '360 × 780 (Pixel 5)', en: '360 × 780 (Pixel 5)' } },
-        { value: '360x800', label: { zh: '360 × 800 (Galaxy S20/S21)', ja: '360 × 800 (Galaxy S20/S21)', en: '360 × 800 (Galaxy S20/S21)' } },
-        { value: '384x854', label: { zh: '384 × 854 (Pixel 6/7)', ja: '384 × 854 (Pixel 6/7)', en: '384 × 854 (Pixel 6/7)' } },
-        { value: '412x892', label: { zh: '412 × 892 (Pixel 8 Pro)', ja: '412 × 892 (Pixel 8 Pro)', en: '412 × 892 (Pixel 8 Pro)' } }
-      ]
-    },
-    {
-      group: { zh: '平板', ja: 'タブレット', en: 'Tablet' },
-      options: [
-        { value: '600x960', label: { zh: '600 × 960 (Nexus 7)', ja: '600 × 960 (Nexus 7)', en: '600 × 960 (Nexus 7)' } },
-        { value: '768x1024', label: { zh: '768 × 1024 (iPad Mini/Air)', ja: '768 × 1024 (iPad Mini/Air)', en: '768 × 1024 (iPad Mini/Air)' } },
-        { value: '810x1080', label: { zh: '810 × 1080 (iPad 10th)', ja: '810 × 1080 (iPad 第10世代)', en: '810 × 1080 (iPad 10th)' } },
-        { value: '834x1112', label: { zh: '834 × 1112 (iPad Air 10.9")', ja: '834 × 1112 (iPad Air 10.9")', en: '834 × 1112 (iPad Air 10.9")' } },
-        { value: '834x1194', label: { zh: '834 × 1194 (iPad Pro 11")', ja: '834 × 1194 (iPad Pro 11")', en: '834 × 1194 (iPad Pro 11")' } },
-        { value: '1024x1366', label: { zh: '1024 × 1366 (iPad Pro 12.9")', ja: '1024 × 1366 (iPad Pro 12.9")', en: '1024 × 1366 (iPad Pro 12.9")' } }
-      ]
-    }
-  ]
-};
+import {
+  SAFE_FALLBACK_CONFIG,
+  normalizeConfig,
+  normalizeState,
+  parseResolution,
+  resizeWindow,
+  runCapture
+} from './popup-core.mjs';
 
 // ==================== Storage Manager ====================
 const STORAGE_KEY = 'userState';
@@ -66,12 +24,9 @@ const saveUserState = (state) => {
       ...getDefaultState(),
       ...state
     };
-    console.log('[Storage] Saving state:', stateToSave);
     chrome.storage.local.set({ [STORAGE_KEY]: stateToSave }, () => {
       if (chrome.runtime.lastError) {
         console.error('[Storage] Save error:', chrome.runtime.lastError);
-      } else {
-        console.log('[Storage] State saved successfully');
       }
     });
   } catch (error) {
@@ -81,7 +36,6 @@ const saveUserState = (state) => {
 
 const loadUserState = (callback) => {
   try {
-    console.log('[Storage] Loading state...');
     chrome.storage.local.get(STORAGE_KEY, (result) => {
       if (chrome.runtime.lastError) {
         console.error('[Storage] Load error:', chrome.runtime.lastError);
@@ -89,14 +43,10 @@ const loadUserState = (callback) => {
         return;
       }
       
-      console.log('[Storage] Raw result:', result);
-      
       if (result[STORAGE_KEY]) {
         const mergedState = { ...getDefaultState(), ...result[STORAGE_KEY] };
-        console.log('[Storage] Loaded state:', mergedState);
         callback(mergedState);
       } else {
-        console.log('[Storage] No saved state found');
         callback(null);
       }
     });
@@ -121,7 +71,6 @@ const saveCurrentState = () => {
     viewportOnly: document.getElementById('viewport-only').checked
   };
   
-  console.log('[Storage] Saving current state:', stateToSave);
   saveUserState(stateToSave);
 };
 // ==================== Storage Manager End ====================
@@ -152,8 +101,9 @@ document.addEventListener('DOMContentLoaded', () => {
       preset: '预置',
       custom: '自定义',
       selectResolution: '选择分辨率',
-      width: '宽度 (px)',
-      height: '高度 (px)',
+      width: '宽度（逻辑像素）',
+      height: '高度（逻辑像素）',
+      customResolutionHint: '截图导出尺寸会根据设备像素比放大，例如 Retina 2x 下 1280 × 900 会导出为 2560 × 1800。',
       viewportTitle: '仅网页可视区域 (Viewport)',
       viewportDesc: '不包含工具栏、地址栏和书签栏',
       applyBtn: '应用分辨率',
@@ -162,9 +112,10 @@ document.addEventListener('DOMContentLoaded', () => {
       applying: '正在调整窗口大小…',
       capturing: '正在截取当前 Viewport…',
       applySuccess: '分辨率已应用。',
+      captureSuccess: '截图已开始保存。',
       captureStepError: '截图失败：',
       saveStepError: '保存失败：',
-      invalidInput: '请输入有效的宽度和高度（最小限制为 100px）。',
+      invalidInput: '请输入有效的宽度和高度（最小限制为 100 个逻辑像素）。',
       invalidPreset: '当前预置分辨率无效，请重新选择。',
       viewportError: '无法访问当前页面进行精准计算。请在普通网页中使用，Chrome 内部页面和扩展页不受支持。',
       resizeError: '调整窗口大小失败。请确认当前窗口不是最小化、全屏或受系统限制状态。',
@@ -176,8 +127,9 @@ document.addEventListener('DOMContentLoaded', () => {
       preset: 'プリセット',
       custom: 'カスタム',
       selectResolution: '解像度を選択',
-      width: '幅 (px)',
-      height: '高さ (px)',
+      width: '幅（論理ピクセル）',
+      height: '高さ（論理ピクセル）',
+      customResolutionHint: 'スクリーンショットの出力サイズはデバイスピクセル比に応じて拡大されます。Retina 2x では 1280 × 900 が 2560 × 1800 で出力されます。',
       viewportTitle: 'ビューポートのみ',
       viewportDesc: 'ツールバー、アドレスバー、ブックマークバーを含まない',
       applyBtn: '解像度を適用',
@@ -186,9 +138,10 @@ document.addEventListener('DOMContentLoaded', () => {
       applying: 'ウィンドウサイズを調整中…',
       capturing: '現在のビューポートをキャプチャ中…',
       applySuccess: '解像度を適用しました。',
+      captureSuccess: 'スクリーンショットの保存を開始しました。',
       captureStepError: 'キャプチャ失敗: ',
       saveStepError: '保存失敗: ',
-      invalidInput: '有効な幅と高さを入力してください（最小100px）。',
+      invalidInput: '有効な幅と高さを入力してください（最小100論理ピクセル）。',
       invalidPreset: '現在のプリセット解像度が無効です。選び直してください。',
       viewportError: '現在のページにアクセスできないため、正確な計算ができません。通常のウェブページでお試しください。',
       resizeError: 'ウィンドウサイズの変更に失敗しました。最小化、全画面、またはOS制限の状態をご確認ください。',
@@ -200,8 +153,9 @@ document.addEventListener('DOMContentLoaded', () => {
       preset: 'Preset',
       custom: 'Custom',
       selectResolution: 'Select Resolution',
-      width: 'Width (px)',
-      height: 'Height (px)',
+      width: 'Width (logical pixels)',
+      height: 'Height (logical pixels)',
+      customResolutionHint: 'Screenshot output is scaled by the device pixel ratio; on Retina 2x, 1280 × 900 exports as 2560 × 1800.',
       viewportTitle: 'Viewport Only',
       viewportDesc: 'Excludes toolbar, address bar, and bookmarks bar',
       applyBtn: 'Apply Resolution',
@@ -210,9 +164,10 @@ document.addEventListener('DOMContentLoaded', () => {
       applying: 'Resizing browser window...',
       capturing: 'Capturing current viewport...',
       applySuccess: 'Resolution applied.',
+      captureSuccess: 'Download started.',
       captureStepError: 'Capture failed: ',
       saveStepError: 'Save failed: ',
-      invalidInput: 'Please enter valid width and height (minimum 100px).',
+      invalidInput: 'Please enter valid width and height (minimum 100 logical pixels).',
       invalidPreset: 'The selected preset is invalid. Please choose another one.',
       viewportError: 'Cannot access the current page for precise calculation. Use this on a regular webpage, not on Chrome internal or extension pages.',
       resizeError: 'Failed to resize the browser window. Make sure the window is not minimized, fullscreen, or blocked by system restrictions.',
@@ -235,24 +190,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const setButtonState = (label, disabled) => {
     applyBtn.disabled = disabled;
-    applyBtn.innerHTML = `
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      ${label}
-    `;
+    applyBtn.querySelector('.button-label').textContent = label;
   };
 
   const setCaptureButtonState = (label, disabled) => {
     captureBtn.disabled = disabled;
-    captureBtn.innerHTML = `
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M7 7H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M9 7l1.5-2h3L15 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="12" cy="13" r="3" stroke="currentColor" stroke-width="2"/>
-      </svg>
-      ${label}
-    `;
+    captureBtn.querySelector('.button-label').textContent = label;
   };
 
   const setStatus = (message, tone = '') => {
@@ -261,21 +204,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tone) {
       statusMessage.classList.add(`is-${tone}`);
     }
-  };
-
-  const parseResolution = (value) => {
-    if (typeof value !== 'string') return null;
-    const match = value.match(/^(\d+)x(\d+)$/);
-    if (!match) return null;
-
-    const width = Number.parseInt(match[1], 10);
-    const height = Number.parseInt(match[2], 10);
-
-    if (width < 100 || height < 100) {
-      return null;
-    }
-
-    return { width, height };
   };
 
   const getErrorMessage = (error, fallback) => {
@@ -299,21 +227,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('label[for="preset-select"]').textContent = t.selectResolution;
     document.querySelector('label[for="custom-width"]').textContent = t.width;
     document.querySelector('label[for="custom-height"]').textContent = t.height;
+    document.querySelector('.custom-resolution-hint').textContent = t.customResolutionHint;
     document.querySelector('.setting-title').textContent = t.viewportTitle;
     document.querySelector('.setting-desc').textContent = t.viewportDesc;
     setButtonState(t.applyBtn, applyBtn.disabled);
     setCaptureButtonState(t.captureBtn, captureBtn.disabled);
-  };
-
-  const isPresetValid = (config, presetValue) => {
-    for (const group of config.presets) {
-      for (const opt of group.options) {
-        if (opt.value === presetValue) {
-          return true;
-        }
-      }
-    }
-    return false;
   };
 
   const renderPresets = (config, savedState = null) => {
@@ -333,62 +251,27 @@ document.addEventListener('DOMContentLoaded', () => {
       presetSelect.appendChild(optgroup);
     });
 
-    // 确定默认分辨率
-    let defaultPreset;
-    if (savedState && savedState.mode === 'preset' && savedState.presetResolution) {
-      // 检查保存的分辨率是否在预置列表中
-      if (isPresetValid(config, savedState.presetResolution)) {
-        defaultPreset = savedState.presetResolution;
-      } else {
-        defaultPreset = parseResolution(config.defaultResolution)
-          ? config.defaultResolution
-          : FALLBACK_CONFIG.defaultResolution;
-      }
-    } else {
-      defaultPreset = parseResolution(config.defaultResolution)
-        ? config.defaultResolution
-        : FALLBACK_CONFIG.defaultResolution;
-    }
+    const presetValues = config.presets.flatMap((groupData) => (
+      groupData.options.map((option) => option.value)
+    ));
+    const state = normalizeState(savedState, presetValues, config.defaultResolution);
 
-    presetSelect.value = defaultPreset;
+    presetSelect.value = state.presetResolution;
     if (!presetSelect.value) {
       presetSelect.selectedIndex = 0;
     }
 
-    // 恢复模式
-    if (savedState && savedState.mode) {
-      const targetMode = savedState.mode;
-      modeRadios.forEach((radio) => {
-        if (radio.value === targetMode) {
-          radio.checked = true;
-        }
-      });
+    customWidth.value = state.customWidth;
+    customHeight.value = state.customHeight;
+    viewportOnlyCheckbox.checked = savedState
+      ? state.viewportOnly
+      : Boolean(config.defaultViewportOnly);
 
-      if (targetMode === 'preset') {
-        presetSection.classList.remove('hidden');
-        customSection.classList.add('hidden');
-      } else {
-        presetSection.classList.add('hidden');
-        customSection.classList.remove('hidden');
-      }
-    }
-
-    // 恢复自定义宽高
-    if (savedState && savedState.mode === 'custom') {
-      if (savedState.customWidth) {
-        customWidth.value = savedState.customWidth;
-      }
-      if (savedState.customHeight) {
-        customHeight.value = savedState.customHeight;
-      }
-    }
-
-    // 恢复 viewportOnly 状态
-    if (savedState && typeof savedState.viewportOnly === 'boolean') {
-      viewportOnlyCheckbox.checked = savedState.viewportOnly;
-    } else {
-      viewportOnlyCheckbox.checked = Boolean(config.defaultViewportOnly);
-    }
+    modeRadios.forEach((radio) => {
+      radio.checked = radio.value === state.mode;
+    });
+    presetSection.classList.toggle('hidden', state.mode !== 'preset');
+    customSection.classList.toggle('hidden', state.mode !== 'custom');
   };
 
   const loadConfig = () => {
@@ -402,7 +285,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return response.json();
       })
-      .then(config => {
+      .then(rawConfig => {
+        const { config, usedFallback } = normalizeConfig(rawConfig, SAFE_FALLBACK_CONFIG);
         applyLanguage(config.language);
         
         // 加载用户保存的状态
@@ -412,16 +296,16 @@ document.addEventListener('DOMContentLoaded', () => {
           isConfigLoaded = true;
           setButtonState(t.applyBtn, false);
           setCaptureButtonState(t.captureBtn, false);
-          setStatus('');
+          setStatus(usedFallback ? t.loadError : '');
         });
       })
       .catch(error => {
         console.error('Failed to load config.json:', error);
-        applyLanguage(FALLBACK_CONFIG.language);
+        applyLanguage(SAFE_FALLBACK_CONFIG.language);
 
         // 加载用户保存的状态（即使 config.json 加载失败）
         loadUserState((savedState) => {
-          renderPresets(FALLBACK_CONFIG, savedState);
+          renderPresets(SAFE_FALLBACK_CONFIG, savedState);
           
           isConfigLoaded = true;
           setButtonState(t.applyBtn, false);
@@ -431,7 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   };
 
-  applyLanguage(FALLBACK_CONFIG.language);
+  applyLanguage(SAFE_FALLBACK_CONFIG.language);
   setButtonState(t.applyBtn, true);
   setCaptureButtonState(t.captureBtn, true);
 
@@ -475,14 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Viewport 开关变化事件
-  viewportOnlyCheckbox.addEventListener('change', () => {
-    if (isConfigLoaded) {
-      saveCurrentState();
-    }
-  });
-
-  applyBtn.addEventListener('click', async () => {
+  const applyResolution = async () => {
     if (!isConfigLoaded) {
       return;
     }
@@ -510,40 +387,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const currentWindow = await chrome.windows.getCurrent();
-      const isViewportOnly = viewportOnlyCheckbox.checked;
+      await resizeWindow({
+        currentWindow,
+        targetDimensions,
+        viewportOnly: viewportOnlyCheckbox.checked,
+        measureViewport: async () => {
+          const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+          if (!tab?.id) {
+            throw new Error('Missing active tab id');
+          }
 
-      if (isViewportOnly) {
-        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        if (!tab?.id) {
-          throw new Error('Missing active tab id');
-        }
+          const [result] = await chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: () => ({
+              innerWidth: window.innerWidth,
+              innerHeight: window.innerHeight
+            })
+          });
 
-        const [result] = await chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          func: () => ({
-            innerWidth: window.innerWidth,
-            innerHeight: window.innerHeight
-          })
-        });
-
-        const currentViewport = result?.result;
-        if (!currentViewport?.innerWidth || !currentViewport?.innerHeight) {
-          throw new Error('Viewport measurement failed');
-        }
-
-        const widthDiff = currentWindow.width - currentViewport.innerWidth;
-        const heightDiff = currentWindow.height - currentViewport.innerHeight;
-
-        await chrome.windows.update(currentWindow.id, {
-          width: targetDimensions.width + widthDiff,
-          height: targetDimensions.height + heightDiff
-        });
-      } else {
-        await chrome.windows.update(currentWindow.id, {
-          width: targetDimensions.width,
-          height: targetDimensions.height
-        });
-      }
+          return result?.result;
+        },
+        updateWindow: (windowId, size) => chrome.windows.update(windowId, size)
+      });
 
       setStatus(t.applySuccess, 'success');
 
@@ -562,7 +427,17 @@ document.addEventListener('DOMContentLoaded', () => {
     } finally {
       setButtonState(t.applyBtn, false);
     }
+  };
+
+  // Viewport 开关变化时，立即按切换后的模式重新应用分辨率
+  viewportOnlyCheckbox.addEventListener('change', () => {
+    if (isConfigLoaded) {
+      saveCurrentState();
+      applyResolution();
+    }
   });
+
+  applyBtn.addEventListener('click', applyResolution);
 
   captureBtn.addEventListener('click', async () => {
     if (!isConfigLoaded) {
@@ -573,34 +448,42 @@ document.addEventListener('DOMContentLoaded', () => {
     setStatus(t.capturing);
 
     try {
-      let dataUrl;
-
-      try {
-        dataUrl = await chrome.tabs.captureVisibleTab(undefined, { format: 'png' });
-      } catch (error) {
-        console.error('Capture step failed:', error);
-        setStatus(`${t.captureStepError}${getErrorMessage(error, t.captureError)}`, 'error');
-        return;
-      }
-
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
 
-      try {
-        await chrome.downloads.download({
-          url: dataUrl,
-          filename: `viewport-${timestamp}.png`,
-          saveAs: true
-        });
-      } catch (error) {
-        console.error('Save step failed:', error);
-        setStatus(`${t.saveStepError}${getErrorMessage(error, t.captureError)}`, 'error');
-        setCaptureButtonState(t.captureBtn, false);
-        return;
-      }
-      return;
+      await runCapture(
+        async () => {
+          try {
+            return await chrome.tabs.captureVisibleTab(undefined, { format: 'png' });
+          } catch (error) {
+            const stepError = new Error(
+              `${t.captureStepError}${getErrorMessage(error, t.captureError)}`
+            );
+            stepError.cause = error;
+            throw stepError;
+          }
+        },
+        async (dataUrl) => {
+          try {
+            await chrome.downloads.download({
+              url: dataUrl,
+              filename: `viewport-${timestamp}.png`,
+              saveAs: true
+            });
+          } catch (error) {
+            const stepError = new Error(
+              `${t.saveStepError}${getErrorMessage(error, t.captureError)}`
+            );
+            stepError.cause = error;
+            throw stepError;
+          }
+        }
+      );
+
+      setStatus(t.captureSuccess, 'success');
     } catch (error) {
       console.error('Capture failed:', error);
-      setStatus(t.captureError, 'error');
+      setStatus(error?.message || t.captureError, 'error');
+    } finally {
       setCaptureButtonState(t.captureBtn, false);
     }
   });
