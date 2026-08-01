@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
@@ -5,6 +6,7 @@ import {
   normalizeConfig,
   normalizeState,
   parseResolution,
+  resizeWindow,
   runCapture
 } from '../popup-core.mjs';
 
@@ -27,6 +29,54 @@ test('getViewportWindowSize adds the measured browser chrome difference', () => 
     ),
     { width: 1020, height: 780 }
   );
+});
+
+test('localized custom resolution copy explains logical pixels', () => {
+  const source = readFileSync(new URL('../popup.js', import.meta.url), 'utf8');
+
+  assert.match(source, /width: '宽度（逻辑像素）'/);
+  assert.match(source, /width: '幅（論理ピクセル）'/);
+  assert.match(source, /width: 'Width \(logical pixels\)'/);
+  assert.match(source, /customResolutionHint: '.*Retina 2x/);
+  assert.doesNotMatch(source, /width: '[^']*pt/i);
+  assert.doesNotMatch(source, /height: '[^']*pt/i);
+});
+
+test('resizeWindow applies the target window size in standard mode', async () => {
+  let measured = false;
+  let updateArgs;
+
+  await resizeWindow({
+    currentWindow: { id: 7, width: 1200, height: 900 },
+    targetDimensions: { width: 1440, height: 900 },
+    viewportOnly: false,
+    measureViewport: async () => {
+      measured = true;
+      return { innerWidth: 1180, innerHeight: 820 };
+    },
+    updateWindow: async (...args) => {
+      updateArgs = args;
+    }
+  });
+
+  assert.equal(measured, false);
+  assert.deepEqual(updateArgs, [7, { width: 1440, height: 900 }]);
+});
+
+test('resizeWindow compensates for browser chrome in viewport-only mode', async () => {
+  let updateArgs;
+
+  await resizeWindow({
+    currentWindow: { id: 7, width: 1200, height: 900 },
+    targetDimensions: { width: 1440, height: 900 },
+    viewportOnly: true,
+    measureViewport: async () => ({ innerWidth: 1180, innerHeight: 820 }),
+    updateWindow: async (...args) => {
+      updateArgs = args;
+    }
+  });
+
+  assert.deepEqual(updateArgs, [7, { width: 1460, height: 980 }]);
 });
 
 test('runCapture passes the captured data to download', async () => {

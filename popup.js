@@ -1,9 +1,9 @@
 import {
   SAFE_FALLBACK_CONFIG,
-  getViewportWindowSize,
   normalizeConfig,
   normalizeState,
   parseResolution,
+  resizeWindow,
   runCapture
 } from './popup-core.mjs';
 
@@ -101,8 +101,9 @@ document.addEventListener('DOMContentLoaded', () => {
       preset: '预置',
       custom: '自定义',
       selectResolution: '选择分辨率',
-      width: '宽度 (px)',
-      height: '高度 (px)',
+      width: '宽度（逻辑像素）',
+      height: '高度（逻辑像素）',
+      customResolutionHint: '截图导出尺寸会根据设备像素比放大，例如 Retina 2x 下 1280 × 900 会导出为 2560 × 1800。',
       viewportTitle: '仅网页可视区域 (Viewport)',
       viewportDesc: '不包含工具栏、地址栏和书签栏',
       applyBtn: '应用分辨率',
@@ -114,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
       captureSuccess: '截图已开始保存。',
       captureStepError: '截图失败：',
       saveStepError: '保存失败：',
-      invalidInput: '请输入有效的宽度和高度（最小限制为 100px）。',
+      invalidInput: '请输入有效的宽度和高度（最小限制为 100 个逻辑像素）。',
       invalidPreset: '当前预置分辨率无效，请重新选择。',
       viewportError: '无法访问当前页面进行精准计算。请在普通网页中使用，Chrome 内部页面和扩展页不受支持。',
       resizeError: '调整窗口大小失败。请确认当前窗口不是最小化、全屏或受系统限制状态。',
@@ -126,8 +127,9 @@ document.addEventListener('DOMContentLoaded', () => {
       preset: 'プリセット',
       custom: 'カスタム',
       selectResolution: '解像度を選択',
-      width: '幅 (px)',
-      height: '高さ (px)',
+      width: '幅（論理ピクセル）',
+      height: '高さ（論理ピクセル）',
+      customResolutionHint: 'スクリーンショットの出力サイズはデバイスピクセル比に応じて拡大されます。Retina 2x では 1280 × 900 が 2560 × 1800 で出力されます。',
       viewportTitle: 'ビューポートのみ',
       viewportDesc: 'ツールバー、アドレスバー、ブックマークバーを含まない',
       applyBtn: '解像度を適用',
@@ -139,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
       captureSuccess: 'スクリーンショットの保存を開始しました。',
       captureStepError: 'キャプチャ失敗: ',
       saveStepError: '保存失敗: ',
-      invalidInput: '有効な幅と高さを入力してください（最小100px）。',
+      invalidInput: '有効な幅と高さを入力してください（最小100論理ピクセル）。',
       invalidPreset: '現在のプリセット解像度が無効です。選び直してください。',
       viewportError: '現在のページにアクセスできないため、正確な計算ができません。通常のウェブページでお試しください。',
       resizeError: 'ウィンドウサイズの変更に失敗しました。最小化、全画面、またはOS制限の状態をご確認ください。',
@@ -151,8 +153,9 @@ document.addEventListener('DOMContentLoaded', () => {
       preset: 'Preset',
       custom: 'Custom',
       selectResolution: 'Select Resolution',
-      width: 'Width (px)',
-      height: 'Height (px)',
+      width: 'Width (logical pixels)',
+      height: 'Height (logical pixels)',
+      customResolutionHint: 'Screenshot output is scaled by the device pixel ratio; on Retina 2x, 1280 × 900 exports as 2560 × 1800.',
       viewportTitle: 'Viewport Only',
       viewportDesc: 'Excludes toolbar, address bar, and bookmarks bar',
       applyBtn: 'Apply Resolution',
@@ -164,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
       captureSuccess: 'Download started.',
       captureStepError: 'Capture failed: ',
       saveStepError: 'Save failed: ',
-      invalidInput: 'Please enter valid width and height (minimum 100px).',
+      invalidInput: 'Please enter valid width and height (minimum 100 logical pixels).',
       invalidPreset: 'The selected preset is invalid. Please choose another one.',
       viewportError: 'Cannot access the current page for precise calculation. Use this on a regular webpage, not on Chrome internal or extension pages.',
       resizeError: 'Failed to resize the browser window. Make sure the window is not minimized, fullscreen, or blocked by system restrictions.',
@@ -224,6 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('label[for="preset-select"]').textContent = t.selectResolution;
     document.querySelector('label[for="custom-width"]').textContent = t.width;
     document.querySelector('label[for="custom-height"]').textContent = t.height;
+    document.querySelector('.custom-resolution-hint').textContent = t.customResolutionHint;
     document.querySelector('.setting-title').textContent = t.viewportTitle;
     document.querySelector('.setting-desc').textContent = t.viewportDesc;
     setButtonState(t.applyBtn, applyBtn.disabled);
@@ -355,14 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Viewport 开关变化事件
-  viewportOnlyCheckbox.addEventListener('change', () => {
-    if (isConfigLoaded) {
-      saveCurrentState();
-    }
-  });
-
-  applyBtn.addEventListener('click', async () => {
+  const applyResolution = async () => {
     if (!isConfigLoaded) {
       return;
     }
@@ -390,43 +387,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const currentWindow = await chrome.windows.getCurrent();
-      const isViewportOnly = viewportOnlyCheckbox.checked;
+      await resizeWindow({
+        currentWindow,
+        targetDimensions,
+        viewportOnly: viewportOnlyCheckbox.checked,
+        measureViewport: async () => {
+          const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+          if (!tab?.id) {
+            throw new Error('Missing active tab id');
+          }
 
-      if (isViewportOnly) {
-        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        if (!tab?.id) {
-          throw new Error('Missing active tab id');
-        }
+          const [result] = await chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: () => ({
+              innerWidth: window.innerWidth,
+              innerHeight: window.innerHeight
+            })
+          });
 
-        const [result] = await chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          func: () => ({
-            innerWidth: window.innerWidth,
-            innerHeight: window.innerHeight
-          })
-        });
-
-        const currentViewport = result?.result;
-        if (!currentViewport?.innerWidth || !currentViewport?.innerHeight) {
-          throw new Error('Viewport measurement failed');
-        }
-
-        const targetWindowSize = getViewportWindowSize(
-          { width: currentWindow.width, height: currentWindow.height },
-          { width: currentViewport.innerWidth, height: currentViewport.innerHeight },
-          targetDimensions
-        );
-
-        await chrome.windows.update(currentWindow.id, {
-          width: targetWindowSize.width,
-          height: targetWindowSize.height
-        });
-      } else {
-        await chrome.windows.update(currentWindow.id, {
-          width: targetDimensions.width,
-          height: targetDimensions.height
-        });
-      }
+          return result?.result;
+        },
+        updateWindow: (windowId, size) => chrome.windows.update(windowId, size)
+      });
 
       setStatus(t.applySuccess, 'success');
 
@@ -445,7 +427,17 @@ document.addEventListener('DOMContentLoaded', () => {
     } finally {
       setButtonState(t.applyBtn, false);
     }
+  };
+
+  // Viewport 开关变化时，立即按切换后的模式重新应用分辨率
+  viewportOnlyCheckbox.addEventListener('change', () => {
+    if (isConfigLoaded) {
+      saveCurrentState();
+      applyResolution();
+    }
   });
+
+  applyBtn.addEventListener('click', applyResolution);
 
   captureBtn.addEventListener('click', async () => {
     if (!isConfigLoaded) {

@@ -22,6 +22,7 @@
 **Files:**
 - Modify: `popup.html:47-64`
 - Modify: `popup.js:100-172, 215-230`
+- Modify: `popup.css:150-180`
 - Test: `tests/popup-core.test.mjs`
 
 **Interfaces:**
@@ -72,6 +73,8 @@ customResolutionHint: '截图导出尺寸会根据设备像素比放大，例如
 ```
 
 Use equivalent Japanese and English translations. In `applyLanguage`, set `document.querySelector('.custom-resolution-hint').textContent = t.customResolutionHint;` alongside the existing labels.
+
+In `popup.css`, style `.custom-resolution-hint` as a small muted, readable paragraph with a compact top margin and line height so it remains visually subordinate to the inputs.
 
 - [ ] **Step 4: Run the tests and checks**
 

@@ -18,6 +18,7 @@ The term `pt` will not be used because it would imply a platform typographic uni
 
 - Update the static fallback labels in `popup.html`.
 - Update the three localized strings and validation wording in `popup.js`.
+- Add a compact muted hint style in `popup.css` so the explanation fits the existing popup hierarchy.
 - Render the localized hint through the existing language application flow.
 - Add a focused test for the localized logical-pixel copy source so future edits do not reintroduce ambiguous `px` wording.
 

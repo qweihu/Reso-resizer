@@ -48,7 +48,7 @@
       <div id="custom-section" class="section hidden">
         <div class="dimension-inputs">
           <div class="form-group">
-            <label for="custom-width">宽度 (px)</label>
+            <label for="custom-width">宽度（逻辑像素）</label>
             <input type="number" id="custom-width" placeholder="1920" min="100">
           </div>
           <div class="divider">
@@ -57,10 +57,13 @@
             </svg>
           </div>
           <div class="form-group">
-            <label for="custom-height">高度 (px)</label>
+            <label for="custom-height">高度（逻辑像素）</label>
             <input type="number" id="custom-height" placeholder="1080" min="100">
           </div>
         </div>
+        <p class="custom-resolution-hint" aria-live="polite">
+          截图导出尺寸会根据设备像素比放大，例如 Retina 2x 下 1280 × 900 会导出为 2560 × 1800。
+        </p>
       </div>
       
       <!-- Viewport 设置 -->

@@ -110,6 +110,31 @@ export const getViewportWindowSize = (windowSize, viewportSize, targetSize) => (
   height: targetSize.height + (windowSize.height - viewportSize.height)
 });
 
+export const resizeWindow = async ({
+  currentWindow,
+  targetDimensions,
+  viewportOnly,
+  measureViewport,
+  updateWindow
+}) => {
+  let windowSize = targetDimensions;
+
+  if (viewportOnly) {
+    const currentViewport = await measureViewport();
+    if (!currentViewport?.innerWidth || !currentViewport?.innerHeight) {
+      throw new Error('Viewport measurement failed');
+    }
+
+    windowSize = getViewportWindowSize(
+      { width: currentWindow.width, height: currentWindow.height },
+      { width: currentViewport.innerWidth, height: currentViewport.innerHeight },
+      targetDimensions
+    );
+  }
+
+  await updateWindow(currentWindow.id, windowSize);
+};
+
 export const runCapture = async (capture, download) => {
   const dataUrl = await capture();
   await download(dataUrl);
